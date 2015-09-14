@@ -3,12 +3,12 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 using UnityEngine;
-using cls = CodeAnalytics.CodeAnalyticsAnalyzer;
+using cls = UnityContrib.CodeAnalysis.HasTooltipCodeAnalyticsAnalyzer;
 
-namespace CodeAnalytics
+namespace UnityContrib.CodeAnalysis
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class CodeAnalyticsAnalyzer : DiagnosticAnalyzer
+    public class HasTooltipCodeAnalyticsAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "HasToolTip";
 

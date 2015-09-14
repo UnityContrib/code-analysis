@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Rename;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Rename;
-using Microsoft.CodeAnalysis.Text;
 
-namespace CodeAnalytics
+namespace UnityContrib.CodeAnalysis
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(CodeAnalyticsCodeFixProvider)), Shared]
-    public class CodeAnalyticsCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(HasTooltipCodeAnalyticsCodeFixProvider)), Shared]
+    public class HasTooltipCodeAnalyticsCodeFixProvider : CodeFixProvider
     {
         private const string title = "Make uppercase";
 
@@ -24,7 +20,7 @@ namespace CodeAnalytics
         {
             get
             {
-                return ImmutableArray.Create(CodeAnalyticsAnalyzer.DiagnosticId);
+                return ImmutableArray.Create(HasTooltipCodeAnalyticsAnalyzer.DiagnosticId);
             }
         }
 

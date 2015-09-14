@@ -32,9 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CodeFixProvider.cs" />
+    <Compile Include="HasTooltipCodeFixProvider.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="DiagnosticAnalyzer.cs" />
+    <Compile Include="HasTooltipDiagnosticAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

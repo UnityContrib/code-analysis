@@ -52,9 +52,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CodeAnalytics\CodeAnalytics.csproj">
+    <ProjectReference Include="..\UnityContrib.CodeAnalysis\UnityContrib.CodeAnalysis.csproj">
       <Project>{FBC7536A-C166-41BE-A2E1-1823D59A5072}</Project>
-      <Name>CodeAnalytics</Name>
+      <Name>UnityContrib.CodeAnalysis</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

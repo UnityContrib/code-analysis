@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="CodeAnalytics.Vsix..1f564b3e-e0d6-4783-ac5b-81f0c3f8ef91" Version="1.0" Language="en-US" Publisher="robin_000"/>
+    <Identity Id="CodeAnalytics.Vsix..1f564b3e-e0d6-4783-ac5b-81f0c3f8ef91" Version="1.0" Language="en-US" Publisher="UnityContrib"/>
     <DisplayName>CodeAnalytics.Vsix</DisplayName>
     <Description xml:space="preserve">This is a sample diagnostic extension for the .NET Compiler Platform ("Roslyn").</Description>
   </Metadata>
@@ -15,7 +15,7 @@
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5.2,)" />
   </Dependencies>
   <Assets>
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="CodeAnalytics" Path="|CodeAnalytics|"/>
-    <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="CodeAnalytics" Path="|CodeAnalytics|"/>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="UnityContrib.CodeAnalysis" Path="|UnityContrib.CodeAnalysis|" />
+    <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="UnityContrib.CodeAnalysis" Path="|UnityContrib.CodeAnalysis|" />
   </Assets>
 </PackageManifest>
