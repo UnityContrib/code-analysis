@@ -22,10 +22,7 @@ The idea is to have a few rules that ensures a good level of quality code. E.g. 
 
 ## Current state
 
-BAD
+OK
 
 - Only one rule
-- Rule class is badly named
 - Rule does not have a code fixer
-- Code not commented
-- Possibly lots of useless files
