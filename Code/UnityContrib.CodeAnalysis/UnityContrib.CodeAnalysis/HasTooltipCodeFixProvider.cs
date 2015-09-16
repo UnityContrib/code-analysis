@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Rename;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -11,11 +11,16 @@ using System.Threading.Tasks;
 
 namespace UnityContrib.CodeAnalysis
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(HasTooltipCodeAnalyticsCodeFixProvider)), Shared]
+    /// <summary>
+    /// Adds [Tooltip] attribute to private instance non-readonly fields marked with [SerializeField] attribute.
+    /// </summary>
+    [Shared]
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(HasTooltipCodeAnalyticsCodeFixProvider))]
     public class HasTooltipCodeAnalyticsCodeFixProvider : CodeFixProvider
     {
-        private const string title = "Make uppercase";
-
+        /// <summary>
+        /// Gets a list of diagnostic IDs that this provider can provider fixes for.
+        /// </summary>
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
             get
@@ -24,48 +29,79 @@ namespace UnityContrib.CodeAnalysis
             }
         }
 
+        /// <summary>
+        /// Gets an optional <see cref="FixAllProvider"/> that can fix all/multiple occurrences of diagnostics fixed by this code fix provider.
+        /// </summary>
         public sealed override FixAllProvider GetFixAllProvider()
         {
             return WellKnownFixAllProviders.BatchFixer;
         }
 
+        /// <summary>
+        /// Computes one or more fixes for the specified <see cref="CodeFixContext"/>.
+        /// </summary>
+        /// <param name="context">
+        /// A <see cref="CodeFixContext"/> containing context information about the diagnostics to fix.
+        /// The context must only contain diagnostics with an <see cref="Diagnostic.Id"/> included in the <see cref="FixableDiagnosticIds"/> for the current provider.
+        /// </param>
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
-            var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-
-            // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
+            var root = await context.Document
+                .GetSyntaxRootAsync(context.CancellationToken)
+                .ConfigureAwait(continueOnCapturedContext: false)
+                ;
             var diagnostic = context.Diagnostics.First();
             var diagnosticSpan = diagnostic.Location.SourceSpan;
-
-            // Find the type declaration identified by the diagnostic.
-            var declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
-
-            // Register a code action that will invoke the fix.
-            //context.RegisterCodeFix(
-            //    CodeAction.Create(
-            //        title: title,
-            //        createChangedSolution: c => MakeUppercaseAsync(context.Document, declaration, c),
-            //        equivalenceKey: title),
-            //    diagnostic);
+            var declaration = root
+                .FindToken(diagnosticSpan.Start)
+                .Parent
+                .AncestorsAndSelf()
+                .OfType<FieldDeclarationSyntax>()
+                .First()
+                ;
+            var title = "Add Tooltip";
+            var action = CodeAction.Create(
+                title,
+                c => AddTooltipAsync(context.Document, declaration, c),
+                equivalenceKey: title
+                );
+            context.RegisterCodeFix(
+                action,
+                diagnostic
+                );
         }
 
-        private async Task<Solution> MakeUppercaseAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        /// <summary>
+        /// Adds the [Tooltip] attribute to the field.
+        /// </summary>
+        /// <param name="document">
+        /// The document containing the field to fix.
+        /// </param>
+        /// <param name="fieldDeclaration">
+        /// The field to fix.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Details regarding code fix cancellation.
+        /// </param>
+        /// <returns>
+        /// The fixed document.
+        /// </returns>
+        private async Task<Document> AddTooltipAsync(Document document, FieldDeclarationSyntax fieldDeclaration, CancellationToken cancellationToken)
         {
-            // Compute new uppercase name.
-            var identifierToken = typeDecl.Identifier;
-            var newName = identifierToken.Text.ToUpperInvariant();
-
-            // Get the symbol representing the type to be renamed.
-            var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-            var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
-
-            // Produce a new solution that has all references to that type renamed, including the declaration.
-            var originalSolution = document.Project.Solution;
-            var optionSet = originalSolution.Workspace.Options;
-            var newSolution = await Renamer.RenameSymbolAsync(document.Project.Solution, typeSymbol, newName, optionSet, cancellationToken).ConfigureAwait(false);
-
-            // Return the new solution with the now-uppercase type name.
-            return newSolution;
+            var token = SyntaxFactory.ParseToken("\"\"");
+            var expression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, token);
+            var argument = SyntaxFactory.AttributeArgument(expression);
+            var arguments = SyntaxFactory.SeparatedList<AttributeArgumentSyntax>().Add(argument);
+            var argumentList = SyntaxFactory.AttributeArgumentList(arguments);
+            var tooltipAttributeSyntax = SyntaxFactory.Attribute(SyntaxFactory.ParseName("Tooltip"), argumentList);
+            var attributeList = SyntaxFactory.AttributeList().AddAttributes(tooltipAttributeSyntax);
+            var nonTooltipField = fieldDeclaration;
+            var newAttributeLists = nonTooltipField.AttributeLists.Add(attributeList);
+            var newTooltipField = nonTooltipField.WithAttributeLists(newAttributeLists);
+            var root = await document.GetSyntaxRootAsync();
+            var newRoot = root.ReplaceNode(nonTooltipField, newTooltipField);
+            var newDocument = document.WithSyntaxRoot(newRoot);
+            return newDocument;
         }
     }
 }
