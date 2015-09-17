@@ -2,7 +2,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
-using UnityEngine;
 using cls = UnityContrib.CodeAnalysis.HasTooltipCodeAnalyticsAnalyzer;
 
 namespace UnityContrib.CodeAnalysis
@@ -102,9 +101,7 @@ namespace UnityContrib.CodeAnalysis
             }
 
             // must derrive from MonoBehaviour
-            var monobehaviourType = typeof(MonoBehaviour);
-            var monoBehaviourNamedTypeSymbol = monobehaviourType.GetNamedSymbol(context);
-            if(!namedTypeSymbol.BaseType.InheritsFromOrEquals(monoBehaviourNamedTypeSymbol))
+            if(!namedTypeSymbol.BaseType.InheritsFromOrEquals("MonoBehaviour", "UnityEngine", "UnityEngine"))
             {
                 return;
             }
@@ -117,17 +114,13 @@ namespace UnityContrib.CodeAnalysis
             }
 
             // must have serializefield attribute
-            var serializeFieldType = typeof(SerializeField);
-            var serializeFieldNamedTypeSymbol = serializeFieldType.GetNamedSymbol(context);
-            if (!attributes.Any(a => a.AttributeClass == serializeFieldNamedTypeSymbol))
+            if (!attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("SerializeField", "UnityEngine", "UnityEngine")))
             {
                 return;
             }
 
             // must not have a tooltip attribute
-            var tooltipAttributeType = typeof(TooltipAttribute);
-            var tooltipAttributeTypeSymbol = tooltipAttributeType.GetNamedSymbol(context);
-            if(attributes.Any(a => a.AttributeClass == tooltipAttributeTypeSymbol))
+            if(attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("TooltipAttribute", "UnityEngine", "UnityEngine")))
             {
                 return;
             }

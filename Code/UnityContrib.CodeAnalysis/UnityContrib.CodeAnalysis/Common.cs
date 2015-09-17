@@ -36,6 +36,68 @@ namespace UnityContrib.CodeAnalysis
         }
 
         /// <summary>
+        /// Returns a value indicating if the <paramref name="namedTypeSymbol"/> inherits from or is equal to the type specified by
+        /// <paramref name="typeName"/>, <paramref name="namespace"/> and <paramref name="assemblyName"/>.
+        /// </summary>
+        /// <param name="namedTypeSymbol">
+        /// The symbol to test if inherits from or equals to the other.
+        /// </param>
+        /// <param name="typeName">
+        /// Name of the other type.
+        /// </param>
+        /// <param name="@namespace">
+        /// Namespace of the other type.
+        /// </param>
+        /// <param name="assemblyName">
+        /// Assembly name of the other type.
+        /// </param>
+        /// <returns>
+        /// true if inherits from or is equal to; otherwise false.
+        /// </returns>
+        public static bool InheritsFromOrEquals(this INamedTypeSymbol namedTypeSymbol, string typeName, string @namespace, string assemblyName)
+        {
+            if (namedTypeSymbol.Name.Equals(typeName, StringComparison.CurrentCulture))
+            {
+                if (namedTypeSymbol.ContainingNamespace.Name.Equals(@namespace, StringComparison.CurrentCulture))
+                {
+                    if (namedTypeSymbol.ContainingAssembly.Name.Equals(assemblyName, StringComparison.CurrentCulture))
+                    {
+                        return true;
+                    }
+                }
+            }
+            if (namedTypeSymbol.BaseType == null)
+            {
+                return false;
+            }
+            return namedTypeSymbol.BaseType.InheritsFromOrEquals(typeName, @namespace, assemblyName);
+        }
+
+        /// <summary>
+        /// Returns a value indicating if the attribute inherits from  or is equal to the type specified by
+        /// <paramref name="typeName"/>, <paramref name="namespace"/> and <paramref name="assemblyName"/>.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to test if inherits from or equals to the other.
+        /// </param>
+        /// <param name="typeName">
+        /// Name of the other type.
+        /// </param>
+        /// <param name="@namespace">
+        /// Namespace of the other type.
+        /// </param>
+        /// <param name="assemblyName">
+        /// Assembly name of the other type.
+        /// </param>
+        /// <returns>
+        /// true if inherits from or is equal to; otherwise false.
+        /// </returns>
+        public static bool IsAttribute(this AttributeData attribute, string typeName, string @namespace, string assemblyName)
+        {
+            return attribute.AttributeClass.InheritsFromOrEquals(typeName, @namespace, assemblyName);
+        }
+
+        /// <summary>
         /// Returns the first symbol matching the specified <paramref name="type"/>.
         /// </summary>
         /// <param name="type">
