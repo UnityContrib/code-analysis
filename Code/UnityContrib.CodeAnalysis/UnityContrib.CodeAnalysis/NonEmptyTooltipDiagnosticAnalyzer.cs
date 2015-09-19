@@ -2,33 +2,32 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
-using cls = UnityContrib.CodeAnalysis.HasTooltipCodeAnalyticsAnalyzer;
+using cls = UnityContrib.CodeAnalysis.NonEmptyTooltipDiagnosticAnalyzer;
 
 namespace UnityContrib.CodeAnalysis
 {
     /// <summary>
-    /// Checks the code for subclasses of <see cref="T:UnityEngine.MonoBehaviour"/> that has private instance fields marked with
-    /// <see cref="T:UnityEngine.SerializeField"/> but isn't marked with a <see cref="T:UnityEngine.TooltipAttribute"/>.
+    /// Checks the <see cref="T:UnityEngine.TooltipAttribute"/> to see if has an empty string.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class HasTooltipCodeAnalyticsAnalyzer : DiagnosticAnalyzer
+    public class NonEmptyTooltipDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
         /// The ID of the analyzer.
         /// </summary>
-        public const string DiagnosticId = "UCHasTooltip";
+        public const string DiagnosticId = "UCNonEmptyTooltip";
 
         /// <summary>
         /// The diagnostics details of the analyzer.
         /// </summary>
         private static DiagnosticDescriptor descriptor = new DiagnosticDescriptor(
             DiagnosticId,
-            title: "Private field marked with SerializeField attribute must also have a Tooltip attribute.",
-            messageFormat: "Private field marked with SerializeField attribute must also have a Tooltip attribute.",
+            title: "Tooltip attribute must contain a description of the field.",
+            messageFormat: "Tooltip attribute has an empty string where there should be a description of the field.",
             category: "Usage",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Add [Tooltip(\"description\")] to the field."
+            description: "Replace the empty string with a description of the field."
             );
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace UnityContrib.CodeAnalysis
         }
 
         /// <summary>
-        /// Checks the field for missing <see cref="T:UnityEngine.TooltipAttribute"/>.
+        /// Checks the <see cref="T:UnityEngine.TooltipAttribute"/> for empty description.
         /// </summary>
         /// <param name="context">
         /// The context of the action.
@@ -113,19 +112,36 @@ namespace UnityContrib.CodeAnalysis
                 return;
             }
 
-            // must have serializefield attribute
-            if (!attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("SerializeField", "UnityEngine", "UnityEngine")))
-            {
-                return;
-            }
-
             // must not have a tooltip attribute
-            if(attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("TooltipAttribute", "UnityEngine", "UnityEngine")))
+            var tooltipAttributeData = attributes.FirstOrDefault(a => a.AttributeClass.InheritsFromOrEquals("TooltipAttribute", "UnityEngine", "UnityEngine"));
+            if(tooltipAttributeData == null)
             {
                 return;
             }
 
-            var diagnostic = Diagnostic.Create(cls.descriptor, fieldSymbol.Locations[0], fieldSymbol.Name);
+            var constructorArguments = tooltipAttributeData.ConstructorArguments;
+            if(constructorArguments == null)
+            {
+                return;
+            }
+
+            var typedConstant = constructorArguments.FirstOrDefault();
+            var value = typedConstant.Value as string;
+            if(value == null)
+            {
+                return;
+            }
+
+            if(value != string.Empty)
+            {
+                return;
+            }
+
+            var diagnostic = Diagnostic.Create(
+                cls.descriptor,
+                fieldSymbol.Locations[0],
+                fieldSymbol.Name
+                );
             context.ReportDiagnostic(diagnostic);
         }
     }

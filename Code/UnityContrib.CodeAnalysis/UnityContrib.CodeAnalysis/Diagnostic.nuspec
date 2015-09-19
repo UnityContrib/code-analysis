@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>UnityContrib.CodeAnalysis</id>
-    <version>2015.09.17.2153</version>
+    <version>2015.09.19.1917</version>
     <title>UnityContrib.CodeAnalysis</title>
     <authors>UnityContrib</authors>
     <owners>UnityContrib</owners>
@@ -10,16 +10,25 @@
     <projectUrl>https://github.com/UnityContrib/code-analysis</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/UnityContrib/framework/master/Branding/UnityContrib%20Github%20Profile%20Picture.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Code analysis library designed for UnityContrib project, but can be used in other Unity game engine projects.</description>
-    <releaseNotes>Removed warning about missing references.</releaseNotes>
+    <description>
+      <![CDATA[
+Code analysis library designed for UnityContrib project, but can be used in other Unity game engine projects.
+
+Contains the following rules:
+      
+UCHasTooltip
+All non-readonly private instance fields marked with [SerializeField] on MonoBehaviours must also have a [Tooltip] attribute.
+      
+UCNonEmptyTooltip
+All [Tooltip] attributes are not allowed to have an empty string.
+
+UCPrivateField
+All fields on MonoBehaviours must be private.
+      ]]>
+    </description>
+    <releaseNotes>Added the new rules UCNonEmptyTooltip and UCPrivateField.</releaseNotes>
     <copyright>Copyright UnityContrib 2015</copyright>
     <tags>analyzers, UnityContrib</tags>
-    <summary><![CDATA[
-      Contains the following rules:
-      
-      HasTooltip
-      All non-readonly private instance fields marked with [SerializeField] on MonoBehaviours must also have a [Tooltip] attribute.
-      ]]></summary>
   </metadata>
   <!-- The convention for analyzers is to put language agnostic dlls in analyzers\dotnet and language specific analyzers in either analyzers\dotnet\cs or analyzers\dotnet\vb -->
   <files>

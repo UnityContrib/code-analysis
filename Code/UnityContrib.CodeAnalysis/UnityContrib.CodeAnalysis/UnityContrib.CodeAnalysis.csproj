@@ -32,8 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="PrivateFieldCodeFixProvider.cs" />
     <Compile Include="HasTooltipCodeFixProvider.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="PrivateFieldDiagnosticAnalyzer.cs" />
+    <Compile Include="NonEmptyTooltipDiagnosticAnalyzer.cs" />
     <Compile Include="HasTooltipDiagnosticAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

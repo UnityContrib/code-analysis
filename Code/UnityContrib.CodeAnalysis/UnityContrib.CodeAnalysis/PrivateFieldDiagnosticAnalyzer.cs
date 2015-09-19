@@ -2,33 +2,32 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
-using cls = UnityContrib.CodeAnalysis.HasTooltipCodeAnalyticsAnalyzer;
+using cls = UnityContrib.CodeAnalysis.PrivateFieldDiagnosticAnalyzer;
 
 namespace UnityContrib.CodeAnalysis
 {
     /// <summary>
-    /// Checks the code for subclasses of <see cref="T:UnityEngine.MonoBehaviour"/> that has private instance fields marked with
-    /// <see cref="T:UnityEngine.SerializeField"/> but isn't marked with a <see cref="T:UnityEngine.TooltipAttribute"/>.
+    /// Checks the field to see if it is private.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class HasTooltipCodeAnalyticsAnalyzer : DiagnosticAnalyzer
+    public class PrivateFieldDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
         /// The ID of the analyzer.
         /// </summary>
-        public const string DiagnosticId = "UCHasTooltip";
+        public const string DiagnosticId = "UCPrivateField";
 
         /// <summary>
         /// The diagnostics details of the analyzer.
         /// </summary>
         private static DiagnosticDescriptor descriptor = new DiagnosticDescriptor(
             DiagnosticId,
-            title: "Private field marked with SerializeField attribute must also have a Tooltip attribute.",
-            messageFormat: "Private field marked with SerializeField attribute must also have a Tooltip attribute.",
-            category: "Usage",
+            title: "Field must be private.",
+            messageFormat: "Field is not private. Use properties or methods if you need to expose the value.",
+            category: "Design",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "Add [Tooltip(\"description\")] to the field."
+            description: "Make the field private."
             );
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace UnityContrib.CodeAnalysis
         }
 
         /// <summary>
-        /// Checks the field for missing <see cref="T:UnityEngine.TooltipAttribute"/>.
+        /// Checks the field.
         /// </summary>
         /// <param name="context">
         /// The context of the action.
@@ -83,49 +82,47 @@ namespace UnityContrib.CodeAnalysis
             }
 
             // ignore read-only fields
-            if(fieldSymbol.IsReadOnly)
+            if (fieldSymbol.IsReadOnly)
             {
                 return;
             }
 
             // ignore non-private fields
-            if(fieldSymbol.DeclaredAccessibility != Accessibility.Private)
+            if (fieldSymbol.DeclaredAccessibility == Accessibility.Private)
             {
                 return;
             }
 
             var namedTypeSymbol = fieldSymbol.ContainingSymbol as INamedTypeSymbol;
-            if(namedTypeSymbol == null)
+            if (namedTypeSymbol == null)
             {
                 return;
             }
 
             // must derrive from MonoBehaviour
-            if(!namedTypeSymbol.BaseType.InheritsFromOrEquals("MonoBehaviour", "UnityEngine", "UnityEngine"))
+            if (!namedTypeSymbol.BaseType.InheritsFromOrEquals("MonoBehaviour", "UnityEngine", "UnityEngine"))
             {
                 return;
             }
 
-            // ignore fields without attributes
+            var hasSerializeFieldAttribute = false;
             var attributes = fieldSymbol.GetAttributes();
-            if(attributes == null || attributes.Length == 0)
+            if (attributes != null && attributes.Length > 0)
             {
-                return;
+                hasSerializeFieldAttribute = attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("SerializeField", "UnityEngine", "UnityEngine"));
             }
 
-            // must have serializefield attribute
-            if (!attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("SerializeField", "UnityEngine", "UnityEngine")))
-            {
-                return;
-            }
+            var properties = ImmutableDictionary<string, string>
+                .Empty
+                .Add(nameof(hasSerializeFieldAttribute), hasSerializeFieldAttribute.ToString())
+                ;
 
-            // must not have a tooltip attribute
-            if(attributes.Any(a => a.AttributeClass.InheritsFromOrEquals("TooltipAttribute", "UnityEngine", "UnityEngine")))
-            {
-                return;
-            }
-
-            var diagnostic = Diagnostic.Create(cls.descriptor, fieldSymbol.Locations[0], fieldSymbol.Name);
+            var diagnostic = Diagnostic.Create(
+                cls.descriptor,
+                fieldSymbol.Locations[0],
+                properties,
+                fieldSymbol.Name
+                );
             context.ReportDiagnostic(diagnostic);
         }
     }
