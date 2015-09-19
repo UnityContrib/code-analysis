@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>UnityContrib.CodeAnalysis</id>
-    <version>2015.09.19.1917</version>
+    <version>$version$</version>
     <title>UnityContrib.CodeAnalysis</title>
     <authors>UnityContrib</authors>
     <owners>UnityContrib</owners>
